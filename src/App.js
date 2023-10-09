@@ -1,22 +1,47 @@
-import React from 'react';
-import PropTypes from "prop-types";
+import React from "react";
+import axios from "axios";
+import Movie from "./Movie";
 
-class App extends React.Component{
+class App extends React.Component {
   state = {
-    count : 0
+    isLoading: "true",
+    movies: [],
   };
-  add = () => {
-    console.log("add");
+
+  getMovies = async () => {
+    const {
+      data: {
+        data: { movies },
+      },
+    } = await axios.get(
+      "https://yts-proxy.now.sh/list_movies.json?sort_by=rating"
+    );
+    // axios가 실행되기 까지 시간이 걸리기 떄문에 await 이 필요하다.
+    this.setState({ movies, isLoading: false });
+  };
+
+  componentDidMount() {
+    this.getMovies();
   }
-  minus = () => {
-    console.log("minus");
-  }
-  render(){
-    return <div>
-      <h1>The number is {this.state.count}</h1>
-      <button onClick={this.add}>add</button>
-      <button onClick={this.minus}>minus</button>
-    </div>
+
+  render() {
+    const { isLoading, movies } = this.state;
+    return (
+      <div>
+        {isLoading
+          ? "Loading..."
+          : movies.map((movie) => (
+              <Movie
+                key={movie.id}
+                id={movie.id}
+                year={movie.year}
+                title={movie.title}
+                summary={movie.summary}
+                poster={movie.medium_cover_image}
+              />
+            ))}
+      </div>
+    );
   }
 }
 
